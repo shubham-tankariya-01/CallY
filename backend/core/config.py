@@ -6,6 +6,10 @@ class AppSettings(BaseSettings):
     VERSION: str = "1.0.0"
     DATABASE_URL: str = "sqlite:///./app.db"
 
+    LIVEKIT_URL:str = ""
+    LIVEKIT_API_KEY:str =""
+    LIVEKIT_API_SECRET: str = ""
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

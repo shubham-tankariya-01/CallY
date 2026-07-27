@@ -9,3 +9,8 @@ class MeetingResponse(BaseModel):
     is_active : bool
 
     model_config = ConfigDict(from_attributes=True)
+
+class LiveKit_token(BaseModel):
+    room_code : str = Field(min_length=7,max_length=7)
+    id : str
+    participant_name: str
