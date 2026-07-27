@@ -1,122 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import JoinForm from './components/JoinForm';
+import { LiveKitRoom, VideoConference } from '@livekit/components-react';
+import '@livekit/components-styles';
+// We import v4 from the uuid library we installed earlier
+import { v4 as uuidv4 } from 'uuid'; 
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [token, setToken] = useState(null);
+  const [serverUrl, setServerUrl] = useState(null);
 
+  // This function is passed to JoinForm. It triggers when the user clicks submit.
+  const handleJoinRequest = async (name, roomCode) => {
+    // Generate a unique ID for this user session
+    const participantId = uuidv4();
+
+    try {
+      // Reaching out to your FastAPI backend
+      const response = await fetch("http://localhost:8000/api/livekit/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          room_code: roomCode,
+          participant_name: name,
+          id: participantId
+        }),
+      });
+
+      if (!response.ok) {
+        // If the backend returns a 404 (Room not found), we throw an error
+        const errorData = await response.json();
+        console.error("FASTAPI ERROR DETAILS:", errorData);
+        throw new Error(errorData.detail || "Failed to join room");
+      }
+
+      // Parse the token and URL from FastAPI's response
+      const data = await response.json();
+      
+      // Update state! This hides the JoinForm and renders the LiveKitRoom
+      setToken(data.token);
+      setServerUrl(data.url);
+      
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  };
+
+  // Screen A: The Form
+  if (token === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <JoinForm onJoin={handleJoinRequest} />
+      </div>
+    );
+  }
+
+  // Screen B: The Video Room
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <LiveKitRoom
+      video={true}
+      audio={true}
+      token={token}
+      serverUrl={serverUrl}
+      data-lk-theme="default"
+      style={{ height: '100vh' }}
+    >
+      <VideoConference />
+    </LiveKitRoom>
+  );
 }
 
-export default App
+export default App;
