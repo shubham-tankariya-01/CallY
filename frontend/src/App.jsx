@@ -66,6 +66,10 @@ function App() {
       serverUrl={serverUrl}
       data-lk-theme="default"
       style={{ height: '100vh' }}
+      onDisconnected={ ()=>{
+        setToken(null);
+        setServerUrl(null);
+      }}
     >
       <VideoConference />
     </LiveKitRoom>
