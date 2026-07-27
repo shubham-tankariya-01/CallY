@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, DateTime, Boolean
 import uuid
 from sqlalchemy.sql import func
-from base import Base
+from .base import Base
 
 class Meeting(Base):
     __tablename__ = "meetings"

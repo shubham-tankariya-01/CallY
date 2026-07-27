@@ -3,9 +3,9 @@ from uuid import UUID
 from datetime import datetime
 
 class MeetingResponse(BaseModel):
-    meeting_id : UUID
+    id : UUID
     room_code : str = Field(min_length=7,max_length=7)
     created_at : datetime 
-    ia_active : bool
+    is_active : bool
 
     model_config = ConfigDict(from_attributes=True)
