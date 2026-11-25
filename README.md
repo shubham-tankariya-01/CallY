@@ -1,4 +1,4 @@
-# Calling App — LiveKit
+# CallY
 
 A full-stack video calling demo built with **React, FastAPI, SQLAlchemy, and LiveKit**. Users enter their display name and a meeting room code to join a LiveKit video conference.
 
